@@ -9,14 +9,14 @@ db = SQLAlchemy()
 
 
 class User(db.Model):
-    __tablename__ = "User"
+    __tablename__ = "user"
     id: Mapped[int] = mapped_column(primary_key=True)
     username: Mapped[str] = mapped_column(
-        String(120), unique=True, nullable=False)
+        String(120), unique=True)
     first_name: Mapped[str] = mapped_column(String(120), nullable=False)
     last_name: Mapped[str] = mapped_column(String(120), nullable=False)
     email: Mapped[str] = mapped_column(
-        String(120), unique=True, nullable=False)
+        String(120), unique=True)
     profile: Mapped["Profile"] = relationship(
         "Profile", back_populates="user", uselist=False)
 
@@ -28,20 +28,24 @@ class User(db.Model):
             # do not serialize the password, its a security breach
         }
 
+
 class Profile(db.Model):
-    __tablename__ = "Profile"
+    __tablename__ = "profile"
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(
-        ForeignKey("User.id"), unique=True, nullable=False)
-    user: Mapped["User"] = relationship("User", back_populates="profile", uselist=False)
+        ForeignKey("user.id"), unique=True)
+    user: Mapped["User"] = relationship(
+        "User", back_populates="profile", uselist=False)
+
 
 class Follow(db.Model):
-    __tablename__ = "Follow"
+    __tablename__ = "follow"
     id: Mapped[int] = mapped_column(primary_key=True)
     following_id: Mapped[int] = mapped_column(
-        ForeignKey("User.id"), nullable=False)
+        ForeignKey("user.id"), nullable=False)
     followed_id: Mapped[int] = mapped_column(
-        ForeignKey("User.id"), nullable=False)
+        ForeignKey("user.id"), nullable=False)
+
 
 class PostType(Enum):
     IMAGE = "image"
@@ -50,18 +54,20 @@ class PostType(Enum):
 
 
 class Post(db.Model):
-    __tablename__ = "Post"
+    __tablename__ = "post"
     id: Mapped[int] = mapped_column(primary_key=True)
-    post_type: Mapped[PostType] = mapped_column(SqlEnum(PostType), nullable=False)
+    post_type: Mapped[PostType] = mapped_column(
+        SqlEnum(PostType), nullable=False)
     post_url: Mapped[str] = mapped_column(String(120), nullable=False)
-    profile_id: Mapped[int] = mapped_column(ForeignKey("Profile.id"), nullable=False)
+    profile_id: Mapped[int] = mapped_column(
+        ForeignKey("profile.id"), nullable=False)
 
 
-class Comments(db.Model):
-    __tablename__ = "Comments"
+class Comment(db.Model):
+    __tablename__ = "comment"
     id: Mapped[int] = mapped_column(primary_key=True)
     profile_id: Mapped[int] = mapped_column(
-        ForeignKey("Profile.id"), nullable=False)
+        ForeignKey("profile.id"), nullable=False)
     post_id: Mapped[int] = mapped_column(
-        ForeignKey("Post.id"), nullable=False)
+        ForeignKey("post.id"), nullable=False)
     comment_text: Mapped[str] = mapped_column(String(300), nullable=False)
